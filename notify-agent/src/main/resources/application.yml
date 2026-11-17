@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: notify-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8106
+  servlet:
+    context-path: /api/bai/notify
+
+logging:
+  level:
+    com.bai.notify: INFO

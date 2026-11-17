@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: digital-human-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8163
+  servlet:
+    context-path: /api/bai/digital-human
+
+logging:
+  level:
+    com.bai.digitalhuman: INFO

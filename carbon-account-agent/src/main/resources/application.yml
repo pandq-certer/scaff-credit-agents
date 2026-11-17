@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: carbon-account-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8136
+  servlet:
+    context-path: /api/bai/carbon
+
+logging:
+  level:
+    com.bai.carbon: INFO

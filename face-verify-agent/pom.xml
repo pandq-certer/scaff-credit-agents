@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.bai.credit</groupId>
+        <artifactId>scaff-credit-agents</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>face-verify-agent</artifactId>
+    <packaging>jar</packaging>
+    <description>A-06 face-verify-agent（BIA-FAC-006）人脸核验原子智能体</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.bai.credit</groupId>
+            <artifactId>bai-common</artifactId>
+        </dependency>
+        <!-- P10 影像平台（底片缺省获取）/ P12 esign-provider（意愿核验联动）外部 Provider 预留（MVP 仿真，未实际接线） -->
+        <dependency>
+            <groupId>com.spatix.scaff</groupId>
+            <artifactId>scaff-iprov</artifactId>
+        </dependency>
+        <!-- Nacos 注册（经 scaff-gateway 统一路由） -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- 测试基建 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

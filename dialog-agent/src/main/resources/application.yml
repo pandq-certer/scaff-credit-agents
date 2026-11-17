@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: dialog-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8107
+  servlet:
+    context-path: /api/bai/dialog
+
+dialog:
+  # LLM 通道模式：MOCK=可用（模板兜底联动转人工开关）；UNAVAILABLE=模拟 DLG_2001 降级
+  llm-mode: ${DIALOG_LLM_MODE:MOCK}
+
+logging:
+  level:
+    com.bai.dialog: INFO

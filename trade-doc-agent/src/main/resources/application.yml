@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: trade-doc-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8138
+  servlet:
+    context-path: /api/bai/trade-doc
+
+logging:
+  level:
+    com.bai.tradedoc: INFO

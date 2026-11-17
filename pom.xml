@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.bai.credit</groupId>
+    <artifactId>scaff-credit-agents</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <description>智能信贷原子/场景智能体集群（独立建仓，复用 scaff-parent 基础设施库并注册同一 Nacos）</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.3</version>
+        <relativePath/>
+    </parent>
+
+    <modules>
+        <module>bai-common</module>
+        <module>ocr-agent</module>
+        <module>face-verify-agent</module>
+        <module>intent-agent</module>
+        <module>search-agent</module>
+        <module>external-data-agent</module>
+        <module>notify-agent</module>
+        <module>dialog-agent</module>
+        <module>agent-orchestrate-agent</module>
+        <module>auth-agent</module>
+        <module>permission-check-agent</module>
+        <module>credit-report-agent</module>
+        <!-- 阶段 2 第一批：B 类理解 / C 类知识 / I 类计算 -->
+        <module>ner-agent</module>
+        <module>text-classify-agent</module>
+        <module>sentiment-agent</module>
+        <module>semantic-match-agent</module>
+        <module>summary-agent</module>
+        <module>tag-agent</module>
+        <module>knowledge-process-agent</module>
+        <module>knowledge-retrieve-agent</module>
+        <module>rag-answer-agent</module>
+        <module>rule-engine-agent</module>
+        <module>data-query-agent</module>
+        <module>pricing-calc-agent</module>
+        <module>limit-calc-agent</module>
+        <module>valuation-agent</module>
+        <module>accounting-exec-agent</module>
+        <module>recommend-agent</module>
+        <module>repayment-plan-agent</module>
+        <!-- 阶段 2 第二批：D 数据分析类 / I 业务计算类 -->
+        <module>metric-calc-agent</module>
+        <module>data-validate-agent</module>
+        <module>data-quality-agent</module>
+        <module>report-gen-agent</module>
+        <module>trend-analyze-agent</module>
+        <module>entity-resolution-agent</module>
+        <module>graph-build-agent</module>
+        <module>deriv-pricing-agent</module>
+        <module>carbon-account-agent</module>
+        <module>bill-agent</module>
+        <module>trade-doc-agent</module>
+        <module>financial-statement-agent</module>
+        <!-- 阶段 2 第三批：E 流程与任务类补齐 / F 生成与创作类 -->
+        <module>task-schedule-agent</module>
+        <module>audit-log-agent</module>
+        <module>text-gen-agent</module>
+        <module>code-gen-agent</module>
+        <!-- 占位原子真实化批次3：其余 E/F/G/H 类原子补齐 -->
+        <module>doc-parse-agent</module>
+        <module>structure-gen-agent</module>
+        <module>compliance-check-agent</module>
+        <module>sensitive-mask-agent</module>
+        <module>screening-agent</module>
+        <module>risk-signal-agent</module>
+        <module>asset-supervise-agent</module>
+        <module>model-infer-agent</module>
+        <module>graph-penetrate-agent</module>
+        <module>todo-agent</module>
+        <module>onsite-inspect-agent</module>
+        <module>event-subscribe-agent</module>
+        <module>approval-route-agent</module>
+        <module>aml-agent</module>
+        <module>image-agent</module>
+        <module>fraud-agent</module>
+        <module>ui-ops-agent</module>
+        <module>call-exec-agent</module>
+        <module>asr-agent</module>
+        <module>tts-agent</module>
+        <!-- 阶段 2 第三批：G 交互与执行类补齐（数字员工） -->
+        <module>digital-human-agent</module>
+        <!-- 阶段 3：场景编排层（98 场景剧本注册表 + 编排执行 + SSE 滚动日志 + credit-web 前端） -->
+        <module>scene-bff</module>
+    </modules>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-cloud.version>2024.0.0</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.bai.credit</groupId>
+                <artifactId>bai-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spatix.scaff</groupId>
+                <artifactId>scaff-base</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spatix.scaff</groupId>
+                <artifactId>scaff-iprov</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spatix.scaff</groupId>
+                <artifactId>scaff-iagent</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <!-- 测试基建：JUnit5 + Mockito + AssertJ（显式版本，兼容 Spring Boot 3.4.3） -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>3.4.3</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

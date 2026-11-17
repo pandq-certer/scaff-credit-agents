@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: text-gen-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8141
+  servlet:
+    context-path: /api/bai/text-gen
+
+logging:
+  level:
+    com.bai.textgen: INFO

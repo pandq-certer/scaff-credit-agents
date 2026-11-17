@@ -1,0 +1,12 @@
+package com.bai.accounting;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class AccountingExecAgentApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(AccountingExecAgentApplication.class, args);
+    }
+}

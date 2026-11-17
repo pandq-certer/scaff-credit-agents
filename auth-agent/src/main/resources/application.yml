@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: auth-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8109
+  servlet:
+    context-path: /api/bai/auth
+
+logging:
+  level:
+    com.bai.auth: INFO

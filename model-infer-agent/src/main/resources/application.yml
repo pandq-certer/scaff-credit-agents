@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: model-infer-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8149
+  servlet:
+    context-path: /api/bai/model/infer
+
+logging:
+  level:
+    com.bai.modelinfer: INFO

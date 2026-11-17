@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: sensitive-mask-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8146
+  servlet:
+    context-path: /api/bai/sensitive-mask
+
+logging:
+  level:
+    com.bai.sensitivemask: INFO

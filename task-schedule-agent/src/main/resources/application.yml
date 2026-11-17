@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: task-schedule-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8142
+  servlet:
+    context-path: /api/bai/task
+
+logging:
+  level:
+    com.bai.tasksched: INFO

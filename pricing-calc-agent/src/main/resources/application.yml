@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: pricing-calc-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8122
+  servlet:
+    context-path: /api/bai/pricing
+
+logging:
+  level:
+    com.bai.pricing: INFO

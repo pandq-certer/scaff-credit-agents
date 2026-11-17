@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: face-verify-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
+
+server:
+  port: 8102
+  servlet:
+    context-path: /api/bai/face
+
+# 引擎内核开关：mock=确定性仿真（默认，联调回归基线）；real=统一 AI 推理网关
+bai:
+  faceverify:
+    provider: ${BAI_FACE_PROVIDER:mock}
+    gateway:
+      base-url: ${BAI_AI_GATEWAY_URL:http://localhost:9100}
+      timeout-ms: 30000
+
+logging:
+  level:
+    com.bai.face: INFO

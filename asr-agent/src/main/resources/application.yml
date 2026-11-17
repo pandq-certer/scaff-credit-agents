@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: asr-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8159
+  servlet:
+    context-path: /api/bai/asr
+
+# 引擎内核开关：mock=确定性仿真（默认，联调回归基线）；real=统一 AI 推理网关
+bai:
+  asr:
+    provider: ${BAI_ASR_PROVIDER:mock}
+    gateway:
+      base-url: ${BAI_AI_GATEWAY_URL:http://localhost:9100}
+      timeout-ms: 30000
+
+logging:
+  level:
+    com.bai.asr: INFO

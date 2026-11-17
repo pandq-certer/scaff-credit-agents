@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: asset-supervise-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8165
+  servlet:
+    context-path: /api/bai/asset-supervise
+
+logging:
+  level:
+    com.bai.assetsupervise: INFO

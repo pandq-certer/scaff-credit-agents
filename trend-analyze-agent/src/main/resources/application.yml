@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: trend-analyze-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8132
+  servlet:
+    context-path: /api/bai/trend
+
+logging:
+  level:
+    com.bai.trend: INFO

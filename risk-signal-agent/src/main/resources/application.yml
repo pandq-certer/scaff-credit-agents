@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: risk-signal-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8148
+  servlet:
+    context-path: /api/bai/risk-signal
+
+logging:
+  level:
+    com.bai.risksignal: INFO

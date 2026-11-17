@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: search-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8104
+  servlet:
+    context-path: /api/bai/search
+
+logging:
+  level:
+    com.bai.search: INFO

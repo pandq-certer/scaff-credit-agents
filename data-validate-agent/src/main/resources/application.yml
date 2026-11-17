@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: data-validate-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8129
+  servlet:
+    context-path: /api/bai/validate
+
+logging:
+  level:
+    com.bai.validate: INFO

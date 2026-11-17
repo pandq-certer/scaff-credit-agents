@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: graph-penetrate-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8150
+  servlet:
+    context-path: /api/bai/graph-penetrate
+
+logging:
+  level:
+    com.bai.graphpenetrate: INFO
+
+graph:
+  # 图存储提供方：mock=确定性仿真；sungraph=真实图穿透（读 SunGraph Knowledge Explorer 快照，Java 层实现路径枚举/环检测）
+  provider: ${GRAPH_PROVIDER:sungraph}
+  sungraph:
+    base-url: ${GRAPH_SUNGRAPH_BASE_URL:http://localhost:8000}
+    read-timeout-seconds: ${GRAPH_SUNGRAPH_READ_TIMEOUT:30}
+  # 图快照 TTL：期内复用内存快照，过期刷新失败时用 stale 快照兜底（GPT_2001 缓存图降级）
+  snapshot-ttl-seconds: ${GRAPH_SNAPSHOT_TTL:60}

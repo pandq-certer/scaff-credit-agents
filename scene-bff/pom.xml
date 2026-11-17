@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.bai.credit</groupId>
+        <artifactId>scaff-credit-agents</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>scene-bff</artifactId>
+    <packaging>jar</packaging>
+    <description>场景编排层 BFF：98 场景剧本注册表 + 编排执行 + SSE 滚动日志（复用 scaff-iagent 会话/编排/SSE 契约）</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.bai.credit</groupId>
+            <artifactId>bai-common</artifactId>
+        </dependency>
+        <!-- 智能体运行时契约：AgentSession/OrchestrationEngine/SessionEventPublisher/SessionSseController 自动装配 -->
+        <dependency>
+            <groupId>com.spatix.scaff</groupId>
+            <artifactId>scaff-iagent</artifactId>
+        </dependency>
+        <!-- Nacos 注册（经 scaff-gateway 统一路由 lb://scene-bff） -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

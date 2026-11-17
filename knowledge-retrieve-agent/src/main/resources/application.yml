@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: knowledge-retrieve-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8118
+  servlet:
+    context-path: /api/bai/knowledge
+
+# 知识库提供方：builtin=内置联调语料快照（默认，零依赖）；sunbrain=SunBrain V23 知识库检索
+# sunbrain 调用失败/超时/未配置时自动降级内置语料，对外契约不变
+kb:
+  provider: ${KB_PROVIDER:builtin}
+  sunbrain:
+    base-url: ${KB_SUNBRAIN_BASE_URL:http://localhost:8080}
+    api-key: ${KB_SUNBRAIN_API_KEY:}
+    binding-ref: ${KB_SUNBRAIN_BINDING_REF:}   # SunBrain KB 绑定引用（V23 路径参数）
+    purpose: knowledge-retrieve
+    timeout-ms: 5000
+
+logging:
+  level:
+    com.bai.kretrieve: INFO

@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: doc-parse-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
+
+server:
+  port: 8143
+  servlet:
+    context-path: /api/bai/docparse
+
+logging:
+  level:
+    com.bai.docparse: INFO
+
+# 引擎内核开关：mock=确定性仿真（默认，联调回归基线）；real=图像类复用统一 AI 推理网关 OCR（PaddleOCR 内核，数据不出行）
+bai:
+  docparse:
+    provider: ${BAI_DOCPARSE_PROVIDER:mock}
+    gateway:
+      base-url: ${BAI_AI_GATEWAY_URL:http://localhost:9100}
+      timeout-ms: 30000

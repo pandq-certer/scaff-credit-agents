@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: graph-build-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8134
+  servlet:
+    context-path: /api/bai/graph
+
+logging:
+  level:
+    com.bai.graph: INFO
+
+graph:
+  # 图存储提供方：mock=确定性仿真（默认）；sungraph=写 SunGraph Knowledge Explorer（本地图谱系统）
+  provider: ${GRAPH_PROVIDER:sungraph}
+  sungraph:
+    base-url: ${GRAPH_SUNGRAPH_BASE_URL:http://localhost:8000}
+    read-timeout-seconds: ${GRAPH_SUNGRAPH_READ_TIMEOUT:30}

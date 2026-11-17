@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: event-subscribe-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8152
+  servlet:
+    context-path: /api/bai/event-subscribe
+
+logging:
+  level:
+    com.bai.eventsubscribe: INFO

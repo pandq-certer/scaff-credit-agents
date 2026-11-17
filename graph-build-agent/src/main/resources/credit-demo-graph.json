@@ -1,0 +1,36 @@
+{
+  "graph_id": "credit-demo-graph",
+  "nodes": [
+    {"id": "N00001", "type": "COMPANY", "content": "北京华信科技有限公司", "valid_from": "2024-01-01", "valid_until": "2099-12-31", "properties": {"color": "#4C8DFF", "properties": {"名称": "北京华信科技有限公司", "来源": "core", "source": "core"}}},
+    {"id": "N00002", "type": "COMPANY", "content": "上海润泽实业有限公司", "valid_from": "2024-01-01", "valid_until": "2099-12-31", "properties": {"color": "#4C8DFF", "properties": {"名称": "上海润泽实业有限公司", "来源": "core", "source": "core"}}},
+    {"id": "N00003", "type": "COMPANY", "content": "深圳市恒益贸易发展有限公司", "valid_from": "2024-01-01", "valid_until": "2099-12-31", "properties": {"color": "#4C8DFF", "properties": {"名称": "深圳市恒益贸易发展有限公司", "来源": "core", "source": "core"}}},
+    {"id": "N00004", "type": "PERSON", "content": "张伟", "valid_from": "2024-01-01", "valid_until": "2099-12-31", "properties": {"color": "#63E6FF", "properties": {"名称": "张伟", "来源": "core", "source": "core"}}},
+    {"id": "N00005", "type": "PERSON", "content": "李娜", "valid_from": "2024-01-01", "valid_until": "2099-12-31", "properties": {"color": "#63E6FF", "properties": {"名称": "李娜", "来源": "core", "source": "core"}}},
+    {"id": "N00006", "type": "PERSON", "content": "王强", "valid_from": "2024-01-01", "valid_until": "2099-12-31", "properties": {"color": "#63E6FF", "properties": {"名称": "王强", "来源": "channel", "source": "channel"}}},
+    {"id": "N00007", "type": "PERSON", "content": "赵敏", "valid_from": "2024-01-01", "valid_until": "2099-12-31", "properties": {"color": "#63E6FF", "properties": {"名称": "赵敏", "来源": "channel", "source": "channel"}}},
+    {"id": "N00008", "type": "COMPANY", "content": "杭州云启信息技术有限公司", "valid_from": "2024-06-01", "valid_until": "2099-12-31", "properties": {"color": "#4C8DFF", "properties": {"名称": "杭州云启信息技术有限公司", "来源": "channel", "source": "channel"}}},
+    {"id": "N00009", "type": "PERSON", "content": "孙丽", "valid_from": "2025-01-01", "valid_until": "2099-12-31", "properties": {"color": "#63E6FF", "properties": {"名称": "孙丽", "来源": "credit-report", "source": "credit-report"}}},
+    {"id": "N00010", "type": "COLLATERAL", "content": "房产-京A-0007号", "valid_from": "2025-03-01", "valid_until": "2099-12-31", "properties": {"color": "#B592FF", "properties": {"名称": "房产-京A-0007号", "来源": "core", "source": "core"}}},
+    {"id": "N00011", "type": "COMPANY", "content": "华信投资合伙企业（有限合伙）", "valid_from": "2024-06-01", "valid_until": "2099-12-31", "properties": {"color": "#4C8DFF", "properties": {"名称": "华信投资合伙企业（有限合伙）", "来源": "core", "source": "core"}}}
+  ],
+  "edges": [
+    {"id": "E00001", "source_id": "N00004", "target_id": "N00001", "type": "EQUITY", "weight": 1.0, "properties": {"source": "core", "valid_from": "2024-01-01", "valid_until": "2099-12-31"}},
+    {"id": "E00002", "source_id": "N00005", "target_id": "N00002", "type": "EQUITY", "weight": 1.0, "properties": {"source": "core", "valid_from": "2024-01-01", "valid_until": "2099-12-31"}},
+    {"id": "E00003", "source_id": "N00001", "target_id": "N00002", "type": "GUARANTEE", "weight": 1.0, "properties": {"source": "core", "valid_from": "2024-03-01", "valid_until": "2099-12-31"}},
+    {"id": "E00004", "source_id": "N00002", "target_id": "N00003", "type": "GUARANTEE", "weight": 1.0, "properties": {"source": "core", "valid_from": "2024-05-01", "valid_until": "2099-12-31"}},
+    {"id": "E00005", "source_id": "N00004", "target_id": "N00001", "type": "EMPLOYMENT", "weight": 1.0, "properties": {"source": "channel", "valid_from": "2024-01-01", "valid_until": "2099-12-31"}},
+    {"id": "E00006", "source_id": "N00005", "target_id": "N00002", "type": "EMPLOYMENT", "weight": 1.0, "properties": {"source": "channel", "valid_from": "2024-02-01", "valid_until": "2099-12-31"}},
+    {"id": "E00007", "source_id": "N00004", "target_id": "N00006", "type": "FAMILY", "weight": 1.0, "properties": {"source": "credit-report", "valid_from": "2024-01-01", "valid_until": "2099-12-31"}},
+    {"id": "E00008", "source_id": "N00005", "target_id": "N00007", "type": "FAMILY", "weight": 1.0, "properties": {"source": "credit-report", "valid_from": "2024-01-01", "valid_until": "2099-12-31"}},
+    {"id": "E00009", "source_id": "N00001", "target_id": "N00008", "type": "TRANSACTION", "weight": 1.0, "properties": {"source": "core", "valid_from": "2024-07-01", "valid_until": "2099-12-31"}},
+    {"id": "E00010", "source_id": "N00002", "target_id": "N00008", "type": "TRANSACTION", "weight": 1.0, "properties": {"source": "core", "valid_from": "2024-08-01", "valid_until": "2099-12-31"}},
+    {"id": "E00011", "source_id": "N00003", "target_id": "N00001", "type": "TRANSACTION", "weight": 1.0, "properties": {"source": "core", "valid_from": "2024-09-01", "valid_until": "2099-12-31"}},
+    {"id": "E00012", "source_id": "N00006", "target_id": "N00007", "type": "CONSISTENT_ACTION", "weight": 1.0, "properties": {"source": "channel", "valid_from": "2025-01-01", "valid_until": "2099-12-31"}},
+    {"id": "E00013", "source_id": "N00007", "target_id": "N00008", "type": "CONSISTENT_ACTION", "weight": 1.0, "properties": {"source": "channel", "valid_from": "2025-02-01", "valid_until": "2099-12-31"}},
+    {"id": "E00014", "source_id": "N00008", "target_id": "N00010", "type": "GUARANTEE", "weight": 1.0, "properties": {"source": "core", "valid_from": "2025-03-01", "valid_until": "2099-12-31"}},
+    {"id": "E00015", "source_id": "N00011", "target_id": "N00001", "type": "EQUITY", "weight": 0.35, "properties": {"source": "core", "valid_from": "2024-06-01", "valid_until": "2099-12-31"}},
+    {"id": "E00016", "source_id": "N00006", "target_id": "N00011", "type": "EQUITY", "weight": 0.60, "properties": {"source": "core", "valid_from": "2024-06-01", "valid_until": "2099-12-31"}},
+    {"id": "E00017", "source_id": "N00003", "target_id": "N00001", "type": "GUARANTEE", "weight": 1.0, "properties": {"source": "core", "valid_from": "2024-07-01", "valid_until": "2099-12-31"}},
+    {"id": "E00018", "source_id": "N00009", "target_id": "N00008", "type": "EQUITY", "weight": 0.70, "properties": {"source": "core", "valid_from": "2025-01-01", "valid_until": "2099-12-31"}}
+  ]
+}

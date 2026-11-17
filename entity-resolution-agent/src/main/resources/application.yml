@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: entity-resolution-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8133
+  servlet:
+    context-path: /api/bai/entity
+
+logging:
+  level:
+    com.bai.entity: INFO

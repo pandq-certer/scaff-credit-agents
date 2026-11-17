@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: semantic-match-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8114
+  servlet:
+    context-path: /api/bai/semantic
+
+logging:
+  level:
+    com.bai.semantic: INFO

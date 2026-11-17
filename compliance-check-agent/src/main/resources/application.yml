@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: compliance-check-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8145
+  servlet:
+    context-path: /api/bai/compliance
+
+logging:
+  level:
+    com.bai.compliance: INFO

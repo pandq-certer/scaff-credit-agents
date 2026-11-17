@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: onsite-inspect-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8161
+  servlet:
+    context-path: /api/bai/onsite-inspect
+
+logging:
+  level:
+    com.bai.onsiteinspect: INFO

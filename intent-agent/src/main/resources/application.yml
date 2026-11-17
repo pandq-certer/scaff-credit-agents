@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: intent-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8103
+  servlet:
+    context-path: /api/bai/intent
+
+logging:
+  level:
+    com.bai.intent: INFO

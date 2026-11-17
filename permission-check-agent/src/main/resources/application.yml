@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: permission-check-agent
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8164
+  servlet:
+    context-path: /api/bai/permission
+
+logging:
+  level:
+    com.bai.permission: INFO

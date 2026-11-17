@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: scene-bff
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+
+server:
+  port: 8201
+  # 网关路由 lb://scene-bff + StripPrefix=0，/api/scene/** 与 /api/iagent/** 由 Controller 自带前缀承接；/ 为 credit-web 前端
+
+# 原子服务直连地址（单机联调；生产可替换为经网关/注册中心寻址）
+scene:
+  atomic-base-url: ${ATOMIC_BASE_URL:http://localhost}
+
+# 大模型对话层（OpenAI 兼容协议；已接入全对话的场景见 SceneDialogSpecs，其余场景 LLM 仅作路由兜底）
+# 生产部署时经环境变量注入 API Key，禁止将真实 Key 写入代码库
+bai:
+  llm:
+    enabled: ${LLM_ENABLED:true}
+    base-url: ${LLM_BASE_URL:https://ark.cn-beijing.volces.com/api/coding/v3}
+    api-key: ${LLM_API_KEY:}
+    model: ${LLM_MODEL:deepseek-v4-flash}
+    timeout-seconds: 40
+    # 语义召回 embedding（OpenAI 兼容 /embeddings 协议；硅基流动 bge-m3，1024 维）
+    # 配置任一缺失则路由自动降级纯词面召回，不影响现有链路
+    embed-base-url: ${EMBED_BASE_URL:https://api.siliconflow.cn/v1}
+    embed-api-key: ${EMBED_API_KEY:}
+    embed-model: ${EMBED_MODEL:BAAI/bge-m3}
+    embed-timeout-seconds: 8
+
+logging:
+  level:
+    com.bai.scene: INFO
