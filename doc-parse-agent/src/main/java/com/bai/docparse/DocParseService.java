@@ -424,7 +424,7 @@ public class DocParseService {
                 case "docx" -> extractDocx(content);
                 case "doc" -> extractDoc(content);
                 case "xlsx", "xls" -> extractExcel(content);
-                case "pdf" -> extractPdf(content);
+                case "pdf" -> extractPdf(content, filename, requestId);
                 default -> extractImageReal(content, filename, requestId);   // 图像类：mock 仿真兜底 / real 推理网关 OCR
             };
         } catch (BaiException e) {
@@ -519,12 +519,26 @@ public class DocParseService {
         return new RealDoc(sb.toString(), tables, -1);
     }
 
-    private RealDoc extractPdf(byte[] content) throws IOException {
+    /** PDF 正文抽取：有文本层走 PDFBox；无文本层（扫描件）交给 SYS-01 解析服务 8102 */
+    private RealDoc extractPdf(byte[] content, String filename, String requestId) throws IOException {
+        int pages;
+        String text;
         try (PDDocument pd = PDDocument.load(content)) {
+            pages = pd.getNumberOfPages();
             PDFTextStripper stripper = new PDFTextStripper();
-            stripper.setEndPage(Math.min(pd.getNumberOfPages(), 20));   // 最多取 20 页正文防超大文件
-            return new RealDoc(stripper.getText(pd), List.of(), pd.getNumberOfPages());
+            stripper.setEndPage(Math.min(pages, 20));   // 最多取 20 页正文防超大文件
+            text = stripper.getText(pd);
         }
+        if (text != null && !text.replaceAll("\\s", "").isEmpty()) {
+            return new RealDoc(text, List.of(), pages);
+        }
+        // 扫描件：mock 提供者返回 null → 保持原仿真兜底；real 走 8102 真实解析
+        DocParseProvider.PdfContent scanned = provider.parsePdf(content, filename, requestId);
+        if (scanned == null) {
+            return new RealDoc(text == null ? "" : text, List.of(), pages);
+        }
+        return new RealDoc(scanned.text(), scanned.tables(),
+                scanned.pages() > 0 ? scanned.pages() : pages);
     }
 
     private int pdfPageCount(byte[] content) {

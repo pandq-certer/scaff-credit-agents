@@ -1,12 +1,14 @@
 package com.bai.docparse;
 
+import java.util.List;
+
 /**
- * 文档解析内容抽取提供者接口：抽象"图像类文件真实内容获取"能力。
+ * 文档解析内容抽取提供者接口：抽象"图像类/扫描件真实内容获取"能力。
  * <p>doc-parse 自身的 Word/Excel/PDF 正文抽取为本地 POI/PDFBox 确定性实现（非 AI 仿真），无需抽象；
- * 唯一依赖外部引擎的是图像类文件（jpg/jpeg/png/tif/tiff）的文字识别——
+ * 依赖外部引擎的是两类：图像类文件（jpg/jpeg/png/tif/tiff）的文字识别，以及无文本层的扫描 PDF。
  * mock 模式返回 null（走确定性仿真兜底，行为与历史版本一致）；
- * real 模式调用统一 AI 推理网关 /v1/ocr/recognize，将 OCR 正文拼接后喂给
- * 现有的 classifyReal 分类与 FIELD_PATTERNS KV 正则白名单真实抽取链路（抽不到置低置信，不伪造值）。
+ * real 模式图像走 SYS-01 OCR 服务 8101 /v1/ocr，扫描 PDF 走 SYS-01 解析服务 8102 /v1/parse，
+ * 正文喂给现有 classifyReal 分类与 FIELD_PATTERNS KV 正则白名单真实抽取链路（抽不到置低置信，不伪造值）。
  */
 public interface DocParseProvider {
 
@@ -20,4 +22,15 @@ public interface DocParseProvider {
      * @throws com.bai.common.BaiException real 模式网关不可达/超时 → DCP_2001；网关业务错误码原样透传
      */
     String ocrImage(byte[] content, String filename, String requestId);
+
+    /** 扫描 PDF 解析结果：阅读顺序正文 + 表格 + 页数 */
+    record PdfContent(String text, List<DocParseDtos.Table> tables, int pages) {}
+
+    /**
+     * 无文本层 PDF（扫描件）内容抽取。
+     * <p>默认返回 null：mock 及未实现该能力的提供者保持既有仿真兜底行为。
+     */
+    default PdfContent parsePdf(byte[] content, String filename, String requestId) {
+        return null;
+    }
 }

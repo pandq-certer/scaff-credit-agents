@@ -24,7 +24,10 @@ public class DocParseProviderConfig {
     @ConditionalOnProperty(name = "bai.docparse.provider", havingValue = "real")
     public DocParseProvider realDocParseProvider(
             @Value("${bai.docparse.sys01.base-url:http://localhost:8101}") String baseUrl,
-            @Value("${bai.docparse.sys01.timeout-ms:180000}") long timeoutMs) {
-        return new RealDocParseProvider(baseUrl, Duration.ofMillis(timeoutMs));
+            @Value("${bai.docparse.sys01.parse-base-url:http://localhost:8102}") String parseBaseUrl,
+            @Value("${bai.docparse.sys01.timeout-ms:180000}") long timeoutMs,
+            @Value("${bai.docparse.sys01.pdf-timeout-ms:900000}") long pdfTimeoutMs) {
+        return new RealDocParseProvider(baseUrl, parseBaseUrl,
+                Duration.ofMillis(timeoutMs), Duration.ofMillis(pdfTimeoutMs));
     }
 }

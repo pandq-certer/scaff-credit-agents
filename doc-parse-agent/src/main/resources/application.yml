@@ -20,10 +20,13 @@ logging:
   level:
     com.bai.docparse: INFO
 
-# 引擎内核开关：mock=确定性仿真（联调回归基线）；real=图像类走 SYS-01 OCR 服务（8101 /v1/ocr）
+# 引擎内核开关：mock=确定性仿真（联调回归基线）；real=图像走 8101 /v1/ocr、扫描 PDF 走 8102 /v1/parse
 bai:
   docparse:
     provider: ${BAI_DOCPARSE_PROVIDER:real}
     sys01:
       base-url: ${BAI_DOCPARSE_SYS01_URL:http://localhost:8101}
+      parse-base-url: ${BAI_DOCPARSE_SYS01_PARSE_URL:http://localhost:8102}
       timeout-ms: 180000
+      # 扫描 PDF 多页 OCR 较慢（实测约 30-60s/页），单独放宽
+      pdf-timeout-ms: 900000
