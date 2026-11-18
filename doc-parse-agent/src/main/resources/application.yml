@@ -20,10 +20,10 @@ logging:
   level:
     com.bai.docparse: INFO
 
-# 引擎内核开关：mock=确定性仿真（默认，联调回归基线）；real=图像类复用统一 AI 推理网关 OCR（PaddleOCR 内核，数据不出行）
+# 引擎内核开关：mock=确定性仿真（联调回归基线）；real=图像类走 SYS-01 OCR 服务（8101 /v1/ocr）
 bai:
   docparse:
-    provider: ${BAI_DOCPARSE_PROVIDER:mock}
-    gateway:
-      base-url: ${BAI_AI_GATEWAY_URL:http://localhost:9100}
-      timeout-ms: 30000
+    provider: ${BAI_DOCPARSE_PROVIDER:real}
+    sys01:
+      base-url: ${BAI_DOCPARSE_SYS01_URL:http://localhost:8101}
+      timeout-ms: 180000

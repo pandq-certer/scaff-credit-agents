@@ -12,13 +12,13 @@ server:
   servlet:
     context-path: /api/bai/ocr
 
-# 引擎内核开关：mock=确定性仿真（默认，联调回归基线）；real=统一 AI 推理网关（PaddleOCR 内核，数据不出行）
+# 引擎内核开关：mock=确定性仿真（联调回归基线）；real=SYS-01 智能文档处理服务（PaddleOCR 内核，数据不出行）
 bai:
   ocr:
-    provider: ${BAI_OCR_PROVIDER:mock}
-    gateway:
-      base-url: ${BAI_AI_GATEWAY_URL:http://localhost:9100}
-      timeout-ms: 30000
+    provider: ${BAI_OCR_PROVIDER:real}
+    sys01:
+      base-url: ${BAI_OCR_SYS01_URL:http://localhost:8101}
+      timeout-ms: 180000
 
 logging:
   level:

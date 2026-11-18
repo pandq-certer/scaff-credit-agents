@@ -16,12 +16,12 @@ server:
   servlet:
     context-path: /api/bai/image
 
-# 引擎内核开关：mock=确定性仿真（默认，联调回归基线）；real=统一 AI 推理网关
+# 引擎内核开关：mock=确定性仿真（联调回归基线）；real=SYS-01 质量明细（8101 /v1/quality）
 bai:
   image:
-    provider: ${BAI_IMAGE_PROVIDER:mock}
-    gateway:
-      base-url: ${BAI_AI_GATEWAY_URL:http://localhost:9100}
+    provider: ${BAI_IMAGE_PROVIDER:real}
+    sys01:
+      base-url: ${BAI_IMAGE_SYS01_URL:http://localhost:8101}
       timeout-ms: 30000
 
 logging:

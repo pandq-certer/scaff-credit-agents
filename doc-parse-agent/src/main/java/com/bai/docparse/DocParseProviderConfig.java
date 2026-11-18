@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import java.time.Duration;
 
 /**
- * 文档解析引擎装配：bai.docparse.provider=mock（默认，确定性仿真，联调回归基线）
- * | real（图像类复用统一 AI 推理网关 OCR，正文喂本地分类/KV 抽取链路）。
+ * 文档解析引擎装配：bai.docparse.provider=mock（确定性仿真，联调回归基线）
+ * | real（图像类走 SYS-01 OCR 服务 8101，正文喂本地分类/KV 抽取链路）。
  */
 @Configuration
 public class DocParseProviderConfig {
@@ -23,8 +23,8 @@ public class DocParseProviderConfig {
     @Bean
     @ConditionalOnProperty(name = "bai.docparse.provider", havingValue = "real")
     public DocParseProvider realDocParseProvider(
-            @Value("${bai.docparse.gateway.base-url:http://localhost:9100}") String baseUrl,
-            @Value("${bai.docparse.gateway.timeout-ms:30000}") long timeoutMs) {
+            @Value("${bai.docparse.sys01.base-url:http://localhost:8101}") String baseUrl,
+            @Value("${bai.docparse.sys01.timeout-ms:180000}") long timeoutMs) {
         return new RealDocParseProvider(baseUrl, Duration.ofMillis(timeoutMs));
     }
 }
