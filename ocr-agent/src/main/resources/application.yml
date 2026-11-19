@@ -6,6 +6,10 @@ spring:
       discovery:
         server-addr: ${NACOS_ADDR:localhost:8848}
         namespace: ${NACOS_NAMESPACE:dev}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
 
 server:
   port: 8101
