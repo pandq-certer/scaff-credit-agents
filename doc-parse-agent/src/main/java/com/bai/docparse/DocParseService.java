@@ -47,7 +47,9 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
  * <p>确定性仿真兜底：JSON 通道（编排层演示提交，无真实字节）仍按 文件名+大小+requestId 哈希推导，
  * 约定钩子：文件名含 encrypted→DCP_1006、corrupt/damaged/black→DCP_1007、超 50MB/200 页→DCP_1005
  * （enableLlm 仅作标记留痕）。图像类文件由 bai.docparse.provider 决定：mock（默认）哈希仿真兜底；
- * real 调统一 AI 推理网关 OCR（PaddleOCR 内核）后走真实分类/KV 抽取链路。
+ * real 调 SYS-01 OCR（8101 /v1/ocr）取 block 级结构（text/confidence/bbox），版面与阅读顺序按真实
+ * block 还原、页数取真实值；docType 按文件名关键词 → 正文关键词 → 扩展名默认值三级收敛
+ * （含 application_form/credit_report 业务类型）。
  * <p>格式支持：PDF（pdf）、图像（jpg/jpeg/png/tif/tiff）、Excel（xlsx/xls，表格主体，无关键词默认台账类）、
  * Word（docx/doc，段落主体，无关键词默认报告类）。
  */
@@ -67,7 +69,8 @@ public class DocParseService {
     private static final List<String> LAYOUT_TYPES = List.of(
             "TITLE", "PARAGRAPH", "TABLE", "IMAGE", "SEAL", "SIGNATURE", "HEADER", "FOOTER", "PAGE_NUMBER");
     private static final List<String> DOC_TYPES = List.of(
-            "loan_contract", "guarantee_contract", "bill", "bank_statement", "certificate", "report", "voucher");
+            "loan_contract", "guarantee_contract", "bill", "bank_statement", "certificate", "report",
+            "voucher", "application_form", "credit_report");
     private static final Map<String, List<String>> KV_TEMPLATE = Map.of(
             "loan_contract", List.of("contract_no", "borrower_name", "loan_amount", "loan_rate", "loan_term"),
             "guarantee_contract", List.of("contract_no", "guarantor_name", "guarantee_amount", "guarantee_way"),
@@ -75,7 +78,9 @@ public class DocParseService {
             "bank_statement", List.of("account_no", "period", "credit_total", "debit_total"),
             "certificate", List.of("cert_no", "holder_name", "issue_org", "issue_date"),
             "report", List.of("report_no", "subject_name", "report_period"),
-            "voucher", List.of("voucher_no", "voucher_amount", "voucher_date", "payee_name"));
+            "voucher", List.of("voucher_no", "voucher_amount", "voucher_date", "payee_name"),
+            "application_form", List.of("applicant_name", "id_no", "phone", "loan_amount", "loan_term"),
+            "credit_report", List.of("report_no", "report_period"));
 
     private final IdempotencyStore idempotency = new IdempotencyStore();
 
@@ -169,10 +174,10 @@ public class DocParseService {
             throw new BaiException(DocParseErrorCodes.UNPARSABLE,
                     "DCP_1007 文档不可解析（损坏/全黑），请重拍或转人工");
         }
-        // 页数：PDF/其他格式真实页数优先（解析正文时一并取得），否则按 100KB/页估算（300DPI 转图后规模近似），超 200 页 DCP_1005
+        // 页数：真实页数优先（PDF 解析/图像 OCR 结构化结果），否则按 100KB/页估算（300DPI 转图后规模近似），超 200 页 DCP_1005
         RealDoc real = content == null ? null : extractReal(content, ext, name, requestId);
-        int pages = real != null && real.pdfPages() > 0
-                ? real.pdfPages()
+        int pages = real != null && real.pages() > 0
+                ? real.pages()
                 : Math.max(1, (int) (size / 102_400) + 1);
         if (pages > MAX_PAGES) {
             throw new BaiException(DocParseErrorCodes.TOO_LARGE,
@@ -264,24 +269,32 @@ public class DocParseService {
             docTypeConfidence = 0.70 + Math.abs(h % 30) / 100.0;
         }
         String docId = "DOC" + TS.format(LocalDateTime.now()) + String.format("%04d", seq.incrementAndGet());
-        // 版面分析：每页 TITLE + PARAGRAPH + HEADER/FOOTER；阅读顺序：真实正文优先，仿真兜底
+        // 版面与阅读顺序：图像 OCR 结构化 block（真实坐标/置信度/顺序）优先；无 block 时按页仿真兜底
         List<DocParseDtos.Layout> layout = new ArrayList<>();
         List<DocParseDtos.ReadingItem> readingOrder = new ArrayList<>();
         int seqNo = 0;
         List<String> paras = real == null || real.text().isBlank() ? List.of()
                 : Arrays.stream(real.text().split("\\r?\\n")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        int paraIdx = 0;
-        for (int p = 1; p <= Math.min(pages, 5); p++) {
-            layout.add(new DocParseDtos.Layout(p, "TITLE", 0.1, 0.08, 0.8, 0.05, conf(h, p)));
-            layout.add(new DocParseDtos.Layout(p, "PARAGRAPH", 0.1, 0.2, 0.8, 0.5, conf(h, p + 7)));
-            layout.add(new DocParseDtos.Layout(p, "HEADER", 0.0, 0.0, 1.0, 0.05, 0.98));
-            layout.add(new DocParseDtos.Layout(p, "FOOTER", 0.0, 0.95, 1.0, 0.05, 0.98));
-            readingOrder.add(new DocParseDtos.ReadingItem(++seqNo, p, "TITLE", docTitle(docType)));
-            String para = paraIdx < paras.size() ? paras.get(paraIdx++) : "第" + p + "页正文段落（仿真抽取）";
-            if (para.length() > 60) {
-                para = para.substring(0, 60) + "…";
+        if (real != null && !real.blocks().isEmpty()) {
+            for (DocParseProvider.OcrBlock b : real.blocks()) {
+                layout.add(new DocParseDtos.Layout(b.page(), "PARAGRAPH",
+                        b.x1(), b.y1(), Math.max(0, b.x2() - b.x1()), Math.max(0, b.y2() - b.y1()), b.confidence()));
+                readingOrder.add(new DocParseDtos.ReadingItem(++seqNo, b.page(), "PARAGRAPH", b.text()));
             }
-            readingOrder.add(new DocParseDtos.ReadingItem(++seqNo, p, "PARAGRAPH", para));
+        } else {
+            int paraIdx = 0;
+            for (int p = 1; p <= Math.min(pages, 5); p++) {
+                layout.add(new DocParseDtos.Layout(p, "TITLE", 0.1, 0.08, 0.8, 0.05, conf(h, p)));
+                layout.add(new DocParseDtos.Layout(p, "PARAGRAPH", 0.1, 0.2, 0.8, 0.5, conf(h, p + 7)));
+                layout.add(new DocParseDtos.Layout(p, "HEADER", 0.0, 0.0, 1.0, 0.05, 0.98));
+                layout.add(new DocParseDtos.Layout(p, "FOOTER", 0.0, 0.95, 1.0, 0.05, 0.98));
+                readingOrder.add(new DocParseDtos.ReadingItem(++seqNo, p, "TITLE", docTitle(docType)));
+                String para = paraIdx < paras.size() ? paras.get(paraIdx++) : "第" + p + "页正文段落（仿真抽取）";
+                if (para.length() > 60) {
+                    para = para.substring(0, 60) + "…";
+                }
+                readingOrder.add(new DocParseDtos.ReadingItem(++seqNo, p, "PARAGRAPH", para));
+            }
         }
         // 表格结构识别：真实表格优先（Excel 全部工作表 / Word 全部表格）；无真实内容时按仿真规则
         List<DocParseDtos.Table> tables = new ArrayList<>();
@@ -381,6 +394,8 @@ public class DocParseService {
             case "bank_statement" -> "银行流水";
             case "certificate" -> "资质证明";
             case "report" -> "评估报告";
+            case "application_form" -> "贷款申请表";
+            case "credit_report" -> "个人信用报告";
             default -> "业务凭证";
         };
     }
@@ -388,6 +403,9 @@ public class DocParseService {
     private String kvValue(String field, int h, int k) {
         long v = Integer.toUnsignedLong(h >> k) ;
         return switch (field) {
+            case "applicant_name" -> pickPerson(v);
+            case "id_no" -> "110101" + String.format("%012d", v % 1_000_000_000_000L).substring(0, 12);
+            case "phone" -> "138" + String.format("%08d", v % 100_000_000L);
             case "contract_no" -> "HT" + String.format("%010d", v % 10_000_000_000L);
             case "bill_no", "report_no", "voucher_no", "cert_no" -> String.format("%012d", v % 1_000_000_000_000L);
             case "borrower_name", "guarantor_name", "holder_name", "subject_name", "drawee", "payee", "payee_name" ->
@@ -414,8 +432,13 @@ public class DocParseService {
 
     // ==================== 真实内容抽取（multipart 通道） ====================
 
-    /** 真实内容抽取结果：正文文本 + 真实表格 + PDF 真实页数（非 PDF 为 -1） */
-    private record RealDoc(String text, List<DocParseDtos.Table> tables, int pdfPages) {}
+    /** 真实内容抽取结果：正文文本 + 真实表格 + 真实页数（未知为 -1，按大小估算）+ 图像 OCR 结构化 block（非图像为空） */
+    private record RealDoc(String text, List<DocParseDtos.Table> tables, int pages,
+                           List<DocParseProvider.OcrBlock> blocks) {
+        RealDoc(String text, List<DocParseDtos.Table> tables, int pages) {
+            this(text, tables, pages, List.of());
+        }
+    }
 
     /** 按扩展名分发真实内容抽取；图像类走 DocParseProvider（mock 返回 null 仿真兜底）；本地解析异常回退仿真兜底（记 WARN，链路不断） */
     private RealDoc extractReal(byte[] content, String ext, String filename, String requestId) {
@@ -435,10 +458,13 @@ public class DocParseService {
         }
     }
 
-    /** 图像类内容：mock 提供者返回 null（仿真兜底，行为不变）；real 提供者返回 OCR 正文喂分类/KV 真实抽取链路 */
+    /** 图像类内容：mock 提供者返回 null（仿真兜底，行为不变）；real 提供者返回结构化 OCR（正文 + block 版面 + 页数） */
     private RealDoc extractImageReal(byte[] content, String filename, String requestId) {
-        String text = provider.ocrImage(content, filename, requestId);
-        return text == null ? null : new RealDoc(text, List.of(), -1);
+        DocParseProvider.ImageContent ic = provider.ocrImageBlocks(content, filename, requestId);
+        if (ic == null) {
+            return null;   // mock 仿真兜底
+        }
+        return new RealDoc(ic.text(), List.of(), ic.pages(), ic.blocks());
     }
 
     private RealDoc extractDocx(byte[] content) throws IOException {
@@ -557,7 +583,14 @@ public class DocParseService {
         if (byName != null) {
             return new String[]{byName, "0.90"};
         }
-        // 2. 正文关键词
+        // 2. 正文关键词（申请表/信用报告在前：申请表正文含"贷款"但无"合同"，须先于合同类收敛）
+        if (text.contains("贷款申请表") || text.contains("贷款申请书") || text.contains("授信审批表")
+                || (text.contains("申请表") && text.contains("贷款"))) {
+            return new String[]{"application_form", "0.95"};
+        }
+        if (text.contains("信用报告") || text.contains("征信报告")) {
+            return new String[]{"credit_report", "0.95"};
+        }
         if (text.contains("保证合同") || text.contains("担保合同")) {
             return new String[]{"guarantee_contract", "0.95"};
         }
@@ -587,6 +620,8 @@ public class DocParseService {
     }
 
     private String nameKeywordType(String lower) {
+        if (lower.contains("申请表") || lower.contains("申请书") || lower.contains("审批表")) return "application_form";
+        if (lower.contains("信用报告") || lower.contains("征信")) return "credit_report";
         if (lower.contains("guarantee") || lower.contains("担保")) return "guarantee_contract";
         if (lower.contains("bill") || lower.contains("票据")) return "bill";
         if (lower.contains("statement") || lower.contains("流水")) return "bank_statement";
@@ -608,8 +643,12 @@ public class DocParseService {
         m.put("contract_no", pats("(?:合同编号|协议编号|合同号)[：:]{1,2}\\s*([A-Za-z0-9\\-]{4,32})"));
         m.put("borrower_name", pats("借款人[：:]{1,2}\\s*(" + CJK + "{2,20})"));
         m.put("loan_amount", pats("[¥￥]\\s*" + AMT,
-                "(?:借款金额|贷款金额|合同金额)[为是：:\\s]{0,4}(?:人民币)?\\s*" + AMT + "\\s*元",
+                "(?:借款金额|贷款金额|申请金额|合同金额)[为是：:\\s]{0,4}(?:人民币)?\\s*" + AMT + "\\s*元?",
                 "金额[为是：:\\s]{0,4}" + AMT));
+        m.put("applicant_name", pats("(?m)(?:申请人姓名|借款申请人|申请人)[：:]{0,2}\\s*([\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\*]{0,3})\\s*$",
+                "(?:申请人姓名|借款申请人|申请人)[：:]{1,2}\\s*([\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\*]{1,19})"));
+        m.put("id_no", pats("身份证号?码?[：:]{0,2}\\s*([0-9Xx\\*]{15,18})"));
+        m.put("phone", pats("(?:联系电话|手机号码?|联系方式)[：:]{0,2}\\s*(1[0-9]{10}|[0-9\\-\\*]{7,15})"));
         m.put("loan_rate", pats("年利率[为是：:\\s]{0,4}([0-9]+(?:\\.[0-9]+)?)\\s*%",
                 "利率[为是：:\\s]{0,4}([0-9]+(?:\\.[0-9]+)?)\\s*%"));
         m.put("loan_term", pats("(?:借款期限|贷款期限|期限)[为是：:\\s]{0,4}([0-9]{1,3}\\s*个?月|[0-9]{1,2}\\s*年)"));

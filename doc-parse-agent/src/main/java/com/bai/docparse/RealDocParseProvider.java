@@ -18,7 +18,8 @@ import java.util.StringJoiner;
 
 /**
  * 真实引擎提供者：图像走 SYS-01 OCR 服务（8101 /v1/ocr），扫描 PDF 走 SYS-01 解析服务（8102 /v1/parse），
- * 均以 multipart 上传；正文按 block 顺序拼接后交给 doc-parse 现有分类（classifyReal）与
+ * 均以 multipart 上传；图像经 ocrImageBlocks 返回 block 级结构（text/confidence/bbox）供版面还原，
+ * 正文按 block 顺序拼接后交给 doc-parse 现有分类（classifyReal）与
  * KV 正则白名单（FIELD_PATTERNS）真实抽取链路。
  * <p>说明：8102 /v1/parse 不接收图像格式（40001），图像类仍走 8101；无文本层 PDF 才走 8102。
  * <p>降级策略：服务不可达/超时 → DCP_2001 MODEL_DEGRADED（真实模式不伪造值）；
@@ -57,15 +58,34 @@ public class RealDocParseProvider implements DocParseProvider {
 
     @Override
     public String ocrImage(byte[] content, String filename, String requestId) {
+        ImageContent ic = ocrImageBlocks(content, filename, requestId);
+        return ic == null ? "" : ic.text();
+    }
+
+    /** 图像结构化 OCR：blocks 保留 text/confidence/bbox（0-1 相对坐标 x1/y1/x2/y2），供 doc-parse 还原版面与阅读顺序 */
+    @Override
+    public ImageContent ocrImageBlocks(byte[] content, String filename, String requestId) {
         JsonNode resp = post(baseUrl, OCR_PATH, filename, content, requestId, timeout);
         StringJoiner joiner = new StringJoiner("\n");
+        List<DocParseProvider.OcrBlock> blocks = new ArrayList<>();
+        int maxPage = 1;
         for (JsonNode n : resp.path("blocks")) {
             String text = n.path("text").asText("").trim();
-            if (!text.isEmpty()) {
-                joiner.add(text);
+            if (text.isEmpty()) {
+                continue;
             }
+            joiner.add(text);
+            int page = n.path("page").asInt(1);
+            maxPage = Math.max(maxPage, page);
+            JsonNode bbox = n.path("bbox");
+            blocks.add(new DocParseProvider.OcrBlock(
+                    page, text, n.path("confidence").asDouble(0.0),
+                    bbox.size() >= 4 ? bbox.get(0).asDouble(0) : 0,
+                    bbox.size() >= 4 ? bbox.get(1).asDouble(0) : 0,
+                    bbox.size() >= 4 ? bbox.get(2).asDouble(0) : 0,
+                    bbox.size() >= 4 ? bbox.get(3).asDouble(0) : 0));
         }
-        return joiner.toString();
+        return new ImageContent(joiner.toString(), List.copyOf(blocks), maxPage);
     }
 
     /** 扫描 PDF：调 8102 /v1/parse，取 blocks 正文与 tables 矩阵（表格文字并入正文供 KV 抽取） */

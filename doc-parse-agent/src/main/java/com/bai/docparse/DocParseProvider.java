@@ -23,6 +23,20 @@ public interface DocParseProvider {
      */
     String ocrImage(byte[] content, String filename, String requestId);
 
+    /** 图像 OCR 结构化 block：坐标为相对原图 0-1 比例的 x1/y1/x2/y2（与 SYS-01 /v1/ocr blocks.bbox 一致） */
+    record OcrBlock(int page, String text, double confidence, double x1, double y1, double x2, double y2) {}
+
+    /** 图像 OCR 结构化结果：正文文本 + 有序 block + 真实页数（图像恒为 1） */
+    record ImageContent(String text, List<OcrBlock> blocks, int pages) {}
+
+    /**
+     * 图像类内容结构化 OCR 抽取（保留 block 级文本/坐标/置信度）。
+     * <p>默认返回 null：mock 及未实现该能力的提供者保持既有仿真兜底行为。
+     */
+    default ImageContent ocrImageBlocks(byte[] content, String filename, String requestId) {
+        return null;
+    }
+
     /** 扫描 PDF 解析结果：阅读顺序正文 + 表格 + 页数 */
     record PdfContent(String text, List<DocParseDtos.Table> tables, int pages) {}
 
